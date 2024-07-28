@@ -17,6 +17,15 @@ const pool = new Pool({
   database: process.env.DB_NAME
 });
 
+function displayBanner(){
+  console.log(`
+    #####################################################
+    #                                                   #
+    #          Employee Tracker System                  #
+    #                                                   #
+    #####################################################
+    `)
+}
 
 function runSchema() {
   const schemaPath = path.join(__dirname, 'Assets/sql/schema.sql');
@@ -340,6 +349,7 @@ pool.connect()
     app.listen(PORT, () => {
       console.log(`Server started Successfully`);
     });
+    displayBanner();
     init();
     
   }).catch(err => {
