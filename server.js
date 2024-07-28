@@ -5,7 +5,6 @@ const path = require("path");
 const { Pool } = require("pg");
 const { log, error } = require("console");
 require("dotenv").config();
-const Table = require("cli-table3");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -96,9 +95,21 @@ function viewDepartments() {
 }
 
 function viewRoles() {
-  pool.query("SELECT * FROM roles", (err, res) => {
+  const query = `
+    SELECT 
+      r.id, 
+      r.title, 
+      r.salary, 
+      d.name AS department
+    FROM 
+      roles r
+    LEFT JOIN 
+      departments d ON r.department_id = d.id;
+  `;
+
+  pool.query(query, (err, res) => {
     if (err) throw err;
-    console.log(formatTable(['ID', 'Title', 'Salary', 'Department Id'], res.rows));
+    console.log(formatTable(['ID', 'Title', 'Salary', 'Department'], res.rows));
     init();
   });
 }
