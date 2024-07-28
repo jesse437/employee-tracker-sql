@@ -1,6 +1,4 @@
 
-\c employees_db;
-
 INSERT INTO departments (name) 
 VALUES('Sales'), 
 ('Marketing'),
@@ -15,8 +13,9 @@ VALUES
     ('Assistant Manager', 60000, 1),
     ('Regional Manager', 80000, 1),
     ('Sales intern', 30000, 1),
-    ('Social Media Manager', 70000, 2)
-    ('Software Engineer', 100000, 3)
+    ('Social Media Manager', 70000, 2),
+    ('Social Media Intern', 40000, 2),
+    ('Software Engineer', 100000, 3),
     ('HR', 50000, 5);
 
 
@@ -25,10 +24,10 @@ VALUES
     ('John', 'Hopkins', 2, NULL),
     ('Tom', 'Twain', 1, 1),
     ('Claire', 'Browne', 3, 1),
-    ('Jesse', 'Ruiz', 3, 5),
-    ('Adam', 'Clark', 4, 4),
-    ('Lisa', 'Gomez', 5, 6),
-    ('Ellen', 'Thomas', 6, 3);
+    ('Jesse', 'Ruiz', 4, NULL),
+    ('Adam', 'Clark', 5, 4),
+    ('Lisa', 'Gomez', 6, 1),
+    ('Ellen', 'Thomas', 7, 4);
     
 
     

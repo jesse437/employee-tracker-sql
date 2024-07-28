@@ -1,7 +1,3 @@
-DROP DATABASE IF EXISTS employees_db;
-CREATE DATABASE employees_db;
-
-\c employees_db;
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
@@ -29,4 +25,3 @@ CREATE TABLE employees (
     FOREIGN KEY (manager_id)
     REFERENCES employees(id)
 );
-
