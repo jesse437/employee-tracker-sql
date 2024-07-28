@@ -1,3 +1,4 @@
+
 \c employees_db;
 
 INSERT INTO departments (name) 
