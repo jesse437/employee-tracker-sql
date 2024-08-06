@@ -1,6 +1,6 @@
 // resetDatabase.js
-const { Client } = require('pg');
-require('dotenv').config();
+const { Client } = require("pg");
+require("dotenv").config();
 
 async function resetDatabase() {
   const client = new Client({
@@ -14,12 +14,12 @@ async function resetDatabase() {
     await client.connect();
 
     // Drop and create the database without using a transaction block
-    await client.query('DROP DATABASE IF EXISTS employees_db');
-    await client.query('CREATE DATABASE employees_db');
+    await client.query("DROP DATABASE IF EXISTS employees_db");
+    await client.query("CREATE DATABASE employees_db");
 
-    console.log('Database reset successfully.');
+    console.log("Database reset successfully.");
   } catch (err) {
-    console.error('Error resetting database:', err);
+    console.error("Error resetting database:", err);
   } finally {
     await client.end();
   }
