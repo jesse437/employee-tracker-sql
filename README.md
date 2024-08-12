@@ -28,11 +28,17 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 # 3. How to Use
 
+## This command-line application allows us to view and add departments, roles and employess, essentially accessing a companies database. To start we will open the command-line and run our application with the command "npm run start". From there you'll be presented with the different options to view and add. You can then choose from the options to modify the companies databae.
+
 # 4. Deployment
 
 ### https://github.com/jesse437/employee-tracker-sql
 
 # 5. Visuals
+
+![alt text](img.png)
+
+<video controls src="presentation.mp4" title="Title"></video>
 
 # 6. Collaborators
 

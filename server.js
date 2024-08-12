@@ -1,4 +1,6 @@
 const inquirer = require("inquirer");
+
+//
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -14,46 +16,44 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   port: 5432,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
 });
 
-function displayBanner(){
+function displayBanner() {
   console.log(`
     #####################################################
     #                                                   #
     #          Employee Tracker System                  #
     #                                                   #
     #####################################################
-    `)
+    `);
 }
 
 function runSchema() {
-  const schemaPath = path.join(__dirname, 'Assets/sql/schema.sql');
-  const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
-  return pool.query(schemaSQL)
+  const schemaPath = path.join(__dirname, "Assets/sql/schema.sql");
+  const schemaSQL = fs.readFileSync(schemaPath, "utf8");
+  return pool
+    .query(schemaSQL)
     .then(() => {
       console.log("Schema applied successfully.");
     })
-    .catch(err => {
+    .catch((err) => {
       console.error("Error applying schema: ", err);
     });
 }
 
-
 function runSeed() {
-  const seedPath = path.join(__dirname, 'Assets/sql/seed.sql');
-  const seedSQL = fs.readFileSync(seedPath, 'utf8');
-  return pool.query(seedSQL)
+  const seedPath = path.join(__dirname, "Assets/sql/seed.sql");
+  const seedSQL = fs.readFileSync(seedPath, "utf8");
+  return pool
+    .query(seedSQL)
     .then(() => {
       console.log("Seed data inserted successfully.");
     })
-    .catch(err => {
-    console.log("Error applying seed data: ", err);
-  })
+    .catch((err) => {
+      console.log("Error applying seed data: ", err);
+    });
 }
-
-
-
 
 function init() {
   inquirer
@@ -97,8 +97,8 @@ function init() {
 function viewDepartments() {
   pool.query("SELECT * FROM departments", (err, res) => {
     if (err) throw err;
-    
-    console.log(formatTable(['ID', 'Name'], res.rows));
+
+    console.log(formatTable(["ID", "Name"], res.rows));
     init();
   });
 }
@@ -118,7 +118,7 @@ function viewRoles() {
 
   pool.query(query, (err, res) => {
     if (err) throw err;
-    console.log(formatTable(['ID', 'Title', 'Salary', 'Department'], res.rows));
+    console.log(formatTable(["ID", "Title", "Salary", "Department"], res.rows));
     init();
   });
 }
@@ -146,11 +146,23 @@ function viewEmployees() {
   pool.query(query, (err, res) => {
     if (err) throw err;
 
-    console.log(formatTable(['ID', 'First Name', 'Last Name', 'Title', 'Department', 'Salary', 'Manager'], res.rows));
+    console.log(
+      formatTable(
+        [
+          "ID",
+          "First Name",
+          "Last Name",
+          "Title",
+          "Department",
+          "Salary",
+          "Manager",
+        ],
+        res.rows
+      )
+    );
     init();
   });
 }
-
 
 function addDepartment() {
   inquirer
@@ -176,27 +188,31 @@ function addDepartment() {
 }
 
 function addRoles() {
-  pool.query("SELECT id, name FROM departments")
+  pool
+    .query("SELECT id, name FROM departments")
     .then((departmentsRes) => {
-      const departments = departmentsRes.rows.map(department => ({ name: department.name, value: department.id }));
-      
+      const departments = departmentsRes.rows.map((department) => ({
+        name: department.name,
+        value: department.id,
+      }));
+
       inquirer
         .prompt([
           {
             type: "input",
             message: "What is the name of the role you would like to add?",
-            name: "new_role"
+            name: "new_role",
           },
           {
             type: "input",
             message: "What is the salary you would like to add?",
-            name: "new_salary"
+            name: "new_salary",
           },
           {
             type: "list",
             message: "Select the department for the new role:",
             name: "new_department",
-            choices: departments
+            choices: departments,
           },
         ])
         .then((response) => {
@@ -212,69 +228,77 @@ function addRoles() {
           );
         });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error("Error fetching departments: ", err);
     });
 }
 
-
 function addEmployee() {
   Promise.all([
     pool.query("SELECT id, title FROM roles"),
-    pool.query("SELECT id, first_name, last_name FROM employees")
-  ]).then(([rolesRes, managersRes]) => {
-    const roles = rolesRes.rows.map(role => ({ name: role.title, value: role.id }));
-    const managers = managersRes.rows.map(manager => ({ name: `${manager.first_name} ${manager.last_name}`, value: manager.id }));
-    
-    managers.unshift({ name: 'None', value: null }); // Add an option for no manager
+    pool.query("SELECT id, first_name, last_name FROM employees"),
+  ])
+    .then(([rolesRes, managersRes]) => {
+      const roles = rolesRes.rows.map((role) => ({
+        name: role.title,
+        value: role.id,
+      }));
+      const managers = managersRes.rows.map((manager) => ({
+        name: `${manager.first_name} ${manager.last_name}`,
+        value: manager.id,
+      }));
 
-    inquirer
-      .prompt([
-        {
-          type: "input",
-          message: "What is the first name of the employee you would like to add?",
-          name: "first_name"
-        },
-        {
-          type: "input",
-          message: "What is the last name of the employee you would like to add?",
-          name: "last_name"
-        },
-        {
-          type: "list",
-          message: "Select the role for the new employee:",
-          name: "role_id",
-          choices: roles
-        },
-        {
-          type: "list",
-          message: "Select the manager for the new employee:",
-          name: "manager_id",
-          choices: managers
-        }
-      ])
-      .then((response) => {
-        pool.query(
-          `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`,
-          [
-            response.first_name,
-            response.last_name,
-            response.role_id,
-            response.manager_id
-          ],
-          (err, res) => {
-            if (err) throw err;
+      managers.unshift({ name: "None", value: null }); // Add an option for no manager
 
-            console.log("Added Employee to the database.");
-            init();
-          }
-        );
-      });
-  }).catch(err => {
-    console.error("Error fetching roles or managers: ", err);
-  });
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            message:
+              "What is the first name of the employee you would like to add?",
+            name: "first_name",
+          },
+          {
+            type: "input",
+            message:
+              "What is the last name of the employee you would like to add?",
+            name: "last_name",
+          },
+          {
+            type: "list",
+            message: "Select the role for the new employee:",
+            name: "role_id",
+            choices: roles,
+          },
+          {
+            type: "list",
+            message: "Select the manager for the new employee:",
+            name: "manager_id",
+            choices: managers,
+          },
+        ])
+        .then((response) => {
+          pool.query(
+            `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`,
+            [
+              response.first_name,
+              response.last_name,
+              response.role_id,
+              response.manager_id,
+            ],
+            (err, res) => {
+              if (err) throw err;
+
+              console.log("Added Employee to the database.");
+              init();
+            }
+          );
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching roles or managers: ", err);
+    });
 }
-
 
 function updateEmployeeRole() {
   pool.query("SELECT * FROM employees", (err, res) => {
@@ -312,7 +336,7 @@ function updateEmployeeRole() {
             [response.role, response.employee],
             (err, res) => {
               if (err) throw err;
-              console.log('Employee role updated successfully.');
+              console.log("Employee role updated successfully.");
               init();
             }
           );
@@ -323,26 +347,45 @@ function updateEmployeeRole() {
 
 function formatTable(headers, rows) {
   const colWidths = headers.map((header, i) => {
-    return Math.max(header.length, ...rows.map(row => String(row[header.toLowerCase().replace(' ', '_')]).length)) + 2;
+    return (
+      Math.max(
+        header.length,
+        ...rows.map(
+          (row) => String(row[header.toLowerCase().replace(" ", "_")]).length
+        )
+      ) + 2
+    );
   });
 
-  const headerRow = headers.map((header, i) => header.padEnd(colWidths[i])).join('|');
+  const headerRow = headers
+    .map((header, i) => header.padEnd(colWidths[i]))
+    .join("|");
 
-  const separatorRow = headers.map((header, i) => '-'.repeat(colWidths[i])).join('+');
+  const separatorRow = headers
+    .map((header, i) => "-".repeat(colWidths[i]))
+    .join("+");
 
-  const dataRows = rows.map(row => {
-    return headers.map((header, i) => String(row[header.toLowerCase().replace(' ', '_')]).padEnd(colWidths[i])).join('|');
-  }).join('\n');
+  const dataRows = rows
+    .map((row) => {
+      return headers
+        .map((header, i) =>
+          String(row[header.toLowerCase().replace(" ", "_")]).padEnd(
+            colWidths[i]
+          )
+        )
+        .join("|");
+    })
+    .join("\n");
 
- 
-  return [headerRow, separatorRow, dataRows].join('\n');
+  return [headerRow, separatorRow, dataRows].join("\n");
 }
 
-
-pool.connect()
+pool
+  .connect()
   .then(() => {
     return runSchema();
-  }).then(() => {
+  })
+  .then(() => {
     return runSeed();
   })
   .then(() => {
@@ -351,10 +394,7 @@ pool.connect()
     });
     displayBanner();
     init();
-    
-  }).catch(err => {
-    console.error("Error Starting server: ", err);
   })
-
-
-
+  .catch((err) => {
+    console.error("Error Starting server: ", err);
+  });
